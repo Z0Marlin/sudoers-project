@@ -36,7 +36,7 @@
       android:layout_marginEnd="58dp"
       android:text="YogAR"
       android:textAlignment="center"
-      android:textColor="#C40E00"
+      android:textColor="#673AB7"
       android:textSize="36sp" />
 
 </RelativeLayout>

@@ -157,6 +157,8 @@ class PosenetActivity :
   /** Abstract interface to someone holding a display surface.    */
   private var surfaceHolder: SurfaceHolder? = null
 
+  private var cached_person: Person? = null
+
   /** [CameraDevice.StateCallback] is called when [CameraDevice] changes its state.   */
   private val stateCallback = object : CameraDevice.StateCallback() {
 
@@ -447,6 +449,9 @@ class PosenetActivity :
       if (frameCounter == 0) {
         processImage(rotatedBitmap)
       }
+      else {
+        renderImage(rotatedBitmap)
+      }
     }
   }
 
@@ -495,7 +500,7 @@ class PosenetActivity :
   }
 
   /** Draw bitmap on Canvas.   */
-  private fun draw(canvas: Canvas, person: Person, bitmap: Bitmap) {
+  private fun draw(canvas: Canvas, bitmap: Bitmap, person: Person? = null) {
     canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
     // Draw `bitmap` and `person` in square canvas.
     val screenWidth: Int
@@ -528,52 +533,34 @@ class PosenetActivity :
 
     val widthRatio = screenWidth.toFloat() / MODEL_WIDTH
     val heightRatio = screenHeight.toFloat() / MODEL_HEIGHT
+    if(person != null) {
+     // Draw key points over the image.
+     for (keyPoint in person.keyPoints) {
+       if (keyPoint.score > minConfidence) {
+         val position = keyPoint.position
+         val adjustedX: Float = position.x.toFloat() * widthRatio + left
+         val adjustedY: Float = position.y.toFloat() * heightRatio + top
+         canvas.drawCircle(adjustedX, adjustedY, circleRadius, paint)
+       }
+     }
 
-    // Draw key points over the image.
-    for (keyPoint in person.keyPoints) {
-      if (keyPoint.score > minConfidence) {
-        val position = keyPoint.position
-        val adjustedX: Float = position.x.toFloat() * widthRatio + left
-        val adjustedY: Float = position.y.toFloat() * heightRatio + top
-        canvas.drawCircle(adjustedX, adjustedY, circleRadius, paint)
-      }
+     for (line in bodyJoints) {
+       if (
+         (person.keyPoints[line.first.ordinal].score > minConfidence) and
+         (person.keyPoints[line.second.ordinal].score > minConfidence)
+       ) {
+         canvas.drawLine(
+           person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio + left,
+           person.keyPoints[line.first.ordinal].position.y.toFloat() * heightRatio + top,
+           person.keyPoints[line.second.ordinal].position.x.toFloat() * widthRatio + left,
+           person.keyPoints[line.second.ordinal].position.y.toFloat() * heightRatio + top,
+           paint
+         )
+       }
+     }
     }
 
-    for (line in bodyJoints) {
-      if (
-        (person.keyPoints[line.first.ordinal].score > minConfidence) and
-        (person.keyPoints[line.second.ordinal].score > minConfidence)
-      ) {
-        canvas.drawLine(
-          person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio + left,
-          person.keyPoints[line.first.ordinal].position.y.toFloat() * heightRatio + top,
-          person.keyPoints[line.second.ordinal].position.x.toFloat() * widthRatio + left,
-          person.keyPoints[line.second.ordinal].position.y.toFloat() * heightRatio + top,
-          paint
-        )
-      }
-    }
-
-    canvas.drawText(
-      "Score: %.2f".format(person.score),
-      (15.0f * widthRatio),
-      (30.0f * heightRatio + bottom),
-      paint
-    )
-    canvas.drawText(
-      "Device: %s".format(posenet.device),
-      (15.0f * widthRatio),
-      (50.0f * heightRatio + bottom),
-      paint
-    )
-    canvas.drawText(
-      "Time: %.2f ms".format(posenet.lastInferenceTimeNanos * 1.0f / 1_000_000),
-      (15.0f * widthRatio),
-      (70.0f * heightRatio + bottom),
-      paint
-    )
-
-    // Draw!
+     //Draw!
     surfaceHolder!!.unlockCanvasAndPost(canvas)
   }
 
@@ -587,10 +574,18 @@ class PosenetActivity :
 
     // Perform inference.
     val person = posenet.estimateSinglePose(scaledBitmap)
-    val canvas: Canvas = surfaceHolder!!.lockCanvas()
-    draw(canvas, person, scaledBitmap)
+    cached_person = person
+    val canvas: Canvas = surfaceHolder!!.lockHardwareCanvas()
+    draw(canvas, scaledBitmap, person)
   }
 
+  private fun renderImage(bitmap: Bitmap) {
+    val croppedBitmap = cropBitmap(bitmap)
+    val scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
+
+    val canvas: Canvas = surfaceHolder!!.lockHardwareCanvas()
+    draw(canvas, scaledBitmap, cached_person)
+  }
   /**
    * Creates a new [CameraCaptureSession] for camera preview.
    */
