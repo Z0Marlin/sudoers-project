@@ -24,8 +24,12 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.ImageView
-import org.tensorflow.lite.examples.posenet.lib.Posenet as Posenet
+import org.tensorflow.lite.examples.posenet.lib.KeyPoint
+import org.tensorflow.lite.examples.posenet.lib.Person
+import org.tensorflow.lite.examples.posenet.lib.Posenet
+
 
 class TestActivity : AppCompatActivity() {
   /** Returns a resized bitmap of the drawable image.    */
@@ -38,6 +42,33 @@ class TestActivity : AppCompatActivity() {
     drawable.draw(canvas)
     return bitmap
   }
+    private fun cosineSimilarity(vecA: List<KeyPoint>, vecB: List<KeyPoint>): Double{
+        var dotProduct = 0.0
+        var normAx = 0.0
+        var normAy = 0.0
+        var normBx = 0.0
+        var normBy = 0.0
+
+        for (i in 0 until vecA.size) {
+            dotProduct += (vecA[i].position.x * vecB[i].position.x) + (vecA[i].position.y * vecB[i].position.y)
+            normAx += Math.pow(vecA[i].position.x.toDouble(), 2.0)
+            normAy += Math.pow(vecA[i].position.y.toDouble(), 2.0)
+
+            normBx += Math.pow(vecB[i].position.x.toDouble(), 2.0)
+            normBy += Math.pow(vecB[i].position.y.toDouble(), 2.0)
+        }
+        return dotProduct / (Math.sqrt(normAx + normAy) * Math.sqrt(normBx + normBy))
+    }
+
+    private fun matchPosture(actualPose: Person, userPose: Person): Boolean {
+        Log.d("actualPoseVector: ", actualPose.keyPoints[0].position.x.toString())
+        Log.d("userPoseVector", userPose.keyPoints[0].position.x.toString())
+
+        var cosineScore = cosineSimilarity(actualPose.keyPoints, userPose.keyPoints)
+        var euclidDist = Math.sqrt(2*(1 - cosineScore))
+
+        return (euclidDist < .14)
+    }
 
   /** Calls the Posenet library functions.    */
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,5 +97,8 @@ class TestActivity : AppCompatActivity() {
     }
     sampleImageView.adjustViewBounds = true
     sampleImageView.setImageBitmap(mutableBitmap)
+
+
+
   }
 }
