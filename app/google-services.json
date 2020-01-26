@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "682783368188",
+    "firebase_url": "https://hakverse-yogar.firebaseio.com",
+    "project_id": "hakverse-yogar",
+    "storage_bucket": "hakverse-yogar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682783368188:android:838d279be42985f40c4879",
+        "android_client_info": {
+          "package_name": "org.tensorflow.lite.examples.posenet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682783368188-b2dhird0obh7mi03g9t022snp14i91tl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.tensorflow.lite.examples.posenet",
+            "certificate_hash": "f81e8f0bd9d0e14ae0c00d5891e6a27d15f3cfd9"
+          }
+        },
+        {
+          "client_id": "682783368188-0le527hv44er67l1ctk11qin6i8qn28s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwOsGoOufNgZ1DxPxLGWAefbOJOAFbtmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682783368188-0le527hv44er67l1ctk11qin6i8qn28s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

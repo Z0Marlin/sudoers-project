@@ -43,10 +43,10 @@ import android.media.ImageReader.OnImageAvailableListener
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
 import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
@@ -61,6 +61,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import org.tensorflow.lite.examples.posenet.lib.BodyPart
+import org.tensorflow.lite.examples.posenet.lib.KeyPoint
 import org.tensorflow.lite.examples.posenet.lib.Person
 import org.tensorflow.lite.examples.posenet.lib.Posenet
 
@@ -158,6 +159,8 @@ class PosenetActivity :
   private var surfaceHolder: SurfaceHolder? = null
 
   private var cached_person: Person? = null
+
+  private var curr_color: Int? = null
 
   /** [CameraDevice.StateCallback] is called when [CameraDevice] changes its state.   */
   private val stateCallback = object : CameraDevice.StateCallback() {
@@ -493,8 +496,8 @@ class PosenetActivity :
   }
 
   /** Set the paint color and size.    */
-  private fun setPaint() {
-    paint.color = Color.RED
+  private fun setPaint(color: Int?) {
+    paint.color = color ?: Color.RED
     paint.textSize = 80.0f
     paint.strokeWidth = 8.0f
   }
@@ -523,7 +526,7 @@ class PosenetActivity :
     right = left + screenWidth
     bottom = top + screenHeight
 
-    setPaint()
+    setPaint(curr_color)
     canvas.drawBitmap(
       bitmap,
       Rect(0, 0, bitmap.width, bitmap.height),
@@ -575,6 +578,10 @@ class PosenetActivity :
     // Perform inference.
     val person = posenet.estimateSinglePose(scaledBitmap)
     cached_person = person
+    if(matchPosture(person, person))
+      curr_color = Color.GREEN
+    else
+      curr_color = Color.RED
     val canvas: Canvas = surfaceHolder!!.lockHardwareCanvas()
     draw(canvas, scaledBitmap, person)
   }
@@ -655,6 +662,34 @@ class PosenetActivity :
         CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
       )
     }
+  }
+
+  private fun cosineSimilarity(vecA: List<KeyPoint>, vecB: List<KeyPoint>): Double{
+    var dotProduct = 0.0
+    var normAx = 0.0
+    var normAy = 0.0
+    var normBx = 0.0
+    var normBy = 0.0
+
+    for (i in 0 until vecA.size) {
+      dotProduct += (vecA[i].position.x * vecB[i].position.x) + (vecA[i].position.y * vecB[i].position.y)
+      normAx += Math.pow(vecA[i].position.x.toDouble(), 2.0)
+      normAy += Math.pow(vecA[i].position.y.toDouble(), 2.0)
+
+      normBx += Math.pow(vecB[i].position.x.toDouble(), 2.0)
+      normBy += Math.pow(vecB[i].position.y.toDouble(), 2.0)
+    }
+    return dotProduct / (Math.sqrt(normAx + normAy) * Math.sqrt(normBx + normBy))
+  }
+
+  private fun matchPosture(actualPose: Person, userPose: Person): Boolean {
+    Log.d("actualPoseVector: ", actualPose.keyPoints[0].position.x.toString())
+    Log.d("userPoseVector", userPose.keyPoints[0].position.x.toString())
+
+    var cosineScore = cosineSimilarity(actualPose.keyPoints, userPose.keyPoints)
+    var euclidDist = Math.sqrt(2*(1 - cosineScore))
+
+    return (euclidDist < .14)
   }
 
   /**
