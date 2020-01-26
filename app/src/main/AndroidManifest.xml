@@ -25,11 +25,11 @@
         android:supportsRtl="true"
         android:theme="@style/MaterialTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
         <activity
             android:name=".TestActivity"
@@ -47,7 +47,13 @@
         <activity
             android:name=".MainActivityAR"
             android:exported="true"
-            android:label="AR Camera" />
+            android:label="AR Camera" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.ar.core"

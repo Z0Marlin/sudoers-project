@@ -69,7 +69,8 @@ dependencies {
 }
 
 
-sceneform.asset('sampledata/model/model.obj',
+
+sceneform.asset('sampledata/gift/model.gltf',
         'default',
-        'sampledata/model/model.sfa',
+        'sampledata/gift/model.sfa',
         'src/main/assets/model')

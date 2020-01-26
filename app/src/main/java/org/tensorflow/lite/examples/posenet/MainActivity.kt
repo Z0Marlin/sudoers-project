@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var gsc: GoogleSignInClient
-    override fun onCreate(savedInstanceState: Bundle?) {
+     fun onFind(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         signInButton.setOnClickListener(this)
