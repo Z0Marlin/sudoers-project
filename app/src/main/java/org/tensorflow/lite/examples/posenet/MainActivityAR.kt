@@ -2,7 +2,6 @@ package org.tensorflow.lite.examples.posenet
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 
 class MainActivityAR : AppCompatActivity() {
 

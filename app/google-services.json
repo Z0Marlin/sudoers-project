@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "682783368188-4ke06d8lkevd3n3c37rndpg4lusianiv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.tensorflow.lite.examples.posenet",
+            "certificate_hash": "301c05c5450c79ac9228b842c6a9ec4cfeae9f7d"
+          }
+        },
+        {
+          "client_id": "682783368188-p3h0hub9quj58lhrai28n714pro8q0ng.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.tensorflow.lite.examples.posenet",
+            "certificate_hash": "21ddbb0722da8e0022e45461b1e95d1463e6c652"
+          }
+        },
+        {
           "client_id": "682783368188-b2dhird0obh7mi03g9t022snp14i91tl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
