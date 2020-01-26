@@ -71,7 +71,7 @@ class TestActivity : AppCompatActivity() {
     }
 
   /** Calls the Posenet library functions.    */
-  override fun onCreate(savedInstanceState: Bundle?) {
+   fun onFound(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_test)
 
