@@ -29,6 +29,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -57,6 +58,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -160,6 +162,8 @@ class PosenetActivity :
 
   private var cached_person: Person? = null
 
+  private var ref_person: Person? = null
+
   private var curr_color: Int? = null
 
   /** [CameraDevice.StateCallback] is called when [CameraDevice] changes its state.   */
@@ -221,6 +225,10 @@ class PosenetActivity :
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     surfaceView = view.findViewById(R.id.surfaceView)
     surfaceHolder = surfaceView!!.holder
+    val drawable_img = ResourcesCompat.getDrawable(resources, R.drawable.pose1, null)
+
+    ref_person = getImagePose(drawable_img)
+
   }
 
   override fun onResume() {
@@ -578,7 +586,7 @@ class PosenetActivity :
     // Perform inference.
     val person = posenet.estimateSinglePose(scaledBitmap)
     cached_person = person
-    if(matchPosture(person, person))
+    if(matchPosture(ref_person, person)
       curr_color = Color.GREEN
     else
       curr_color = Color.RED
@@ -682,7 +690,7 @@ class PosenetActivity :
     return dotProduct / (Math.sqrt(normAx + normAy) * Math.sqrt(normBx + normBy))
   }
 
-  private fun matchPosture(actualPose: Person, userPose: Person): Boolean {
+  private fun matchPosture(actualPose: Person?, userPose: Person?): Boolean {
     Log.d("actualPoseVector: ", actualPose.keyPoints[0].position.x.toString())
     Log.d("userPoseVector", userPose.keyPoints[0].position.x.toString())
 
@@ -690,6 +698,23 @@ class PosenetActivity :
     var euclidDist = Math.sqrt(2*(1 - cosineScore))
 
     return (euclidDist < .14)
+  }
+
+  private fun drawableToBitmap(drawable: Drawable): Bitmap {
+    val bitmap = Bitmap.createBitmap(257, 353, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+
+    drawable.draw(canvas)
+    return bitmap                         1
+  }
+  private fun getImagePose(myImagePose: Drawable?): Person {
+    val drawnImage = myImagePose
+    val imageBitmap = drawableToBitmap(drawnImage!!)
+    val posenet = Posenet(this.applicationContext)
+
+    return  posenet.estimateSinglePose(imageBitmap)
   }
 
   /**
